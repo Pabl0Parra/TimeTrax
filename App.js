@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { View, Text } from "react-native";
 import SplashScreen from "./src/components/SplashScreen";
+import ClockInScreen from "./src/screens/ClockInScreen";
 
 const App = () => {
   const [loading, setLoading] = useState(true);
@@ -15,11 +16,7 @@ const App = () => {
     return <SplashScreen />;
   }
 
-  return (
-    <View>
-      <Text>TimeTrax</Text>
-    </View>
-  );
+  return <ClockInScreen />;
 };
 
 export default App;
