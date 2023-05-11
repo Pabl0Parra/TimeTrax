@@ -1,81 +1,69 @@
 import React, { useState } from 'react';
-import { View, Text, Button, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import Geolocation from '@react-native-community/geolocation';
+import FingerprintAuthScreen from './FingerprintAuthScreen';
 
-
-const YOUR_LATITUDE = 0;
-const YOUR_LONGITUDE = 0;
+const CLOCK_IN_LATITUDE = 41.4300251;
+const CLOCK_IN_LONGITUDE = 2.2138386;
 
 const ClockInScreen = () => {
-    const [clockedIn, setClockedIn] = useState(false);
+    const [authenticated, setAuthenticated] = useState(false);
+    const [location, setLocation] = useState(null);
 
     const handleClockIn = () => {
         Geolocation.getCurrentPosition(
             position => {
-                const { latitude, longitude } = position.coords;
-                const clockinLocation = { latitude: YOUR_LATITUDE, longitude: YOUR_LONGITUDE };
-                const userLocation = { latitude, longitude };
-                const distance = calcDistance(clockinLocation, userLocation);
-                if (distance <= 5) {
-                    setClockedIn(true);
-                } else {
-                    alert('You must be within 5 meters of the clock in location to clock in.');
+                setLocation(position);
+                console.log("Current position", position);
+                if (
+                    // position.coords.accuracy <= 5 &&
+                    position.coords.latitude === CLOCK_IN_LATITUDE &&
+                    position.coords.longitude === CLOCK_IN_LONGITUDE
+                ) {
+                    setAuthenticated(true);
                 }
             },
-            error => alert(error.message),
+            error => console.log(error),
             { enableHighAccuracy: true, timeout: 20000, maximumAge: 1000 }
         );
     };
 
-    const calcDistance = (loc1, loc2) => {
-        const R = 6371e3; // metres
-        const φ1 = (loc1.latitude * Math.PI) / 180;
-        const φ2 = (loc2.latitude * Math.PI) / 180;
-        const Δφ = ((loc2.latitude - loc1.latitude) * Math.PI) / 180;
-        const Δλ = ((loc2.longitude - loc1.longitude) * Math.PI) / 180;
-
-        const a =
-            Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
-            Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
-        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-
-        const d = R * c;
-        return d;
+    const handleAuthenticate = () => {
+        // TODO: Save clock in time and navigate to clock out screen
     };
 
-    return (
-        <View style={styles.container}>
-            <Text style={styles.title}>Clock In</Text>
-            {clockedIn ? (
-                <Text style={styles.message}>You are clocked in!</Text>
-            ) : (
-                <Button title="Clock In" onPress={handleClockIn} style={styles.button} />
-            )}
-        </View>
-    );
+    if (!authenticated && location) {
+        return <Text>Not in range to clock in</Text>;
+    }
+
+    if (!authenticated) {
+        return (
+            <View style={styles.container}>
+                <TouchableOpacity style={styles.button} onPress={handleClockIn}>
+                    <Text style={styles.buttonText}>Clock In</Text>
+                </TouchableOpacity>
+            </View>
+        );
+    }
+
+    return <FingerprintAuthScreen onAuthenticate={handleAuthenticate} />;
 };
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
         alignItems: 'center',
-        justifyContent: 'center',
-    },
-    title: {
-        fontSize: 24,
-        fontWeight: 'bold',
-        marginBottom: 16,
-    },
-    message: {
-        fontSize: 24,
-        color: 'green',
-        marginBottom: 16,
+        justifyContent: 'center'
     },
     button: {
-        marginTop: 16,
-        backgroundColor: "#eb6909",
+        backgroundColor: '#4CAF50',
+        padding: 20,
+        borderRadius: 10
     },
-
+    buttonText: {
+        color: '#FFFFFF',
+        fontSize: 20
+    }
 });
 
 export default ClockInScreen;
