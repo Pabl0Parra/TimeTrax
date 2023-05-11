@@ -9,7 +9,7 @@ const SplashScreen = () => {
     useEffect(() => {
         if (logoRef) {
             logoRef.animate({
-                0: { scale: 0, translateY: -200 },
+                0: { scale: 0, translateY: 0 },
                 1: { scale: 1, translateY: 0 },
             }, 1000);
         }
